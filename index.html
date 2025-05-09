@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Berufsquiz – Einzeldatei</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #e3ecf5, #f7f9fc);
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      justify-content: center;
+      color: #333;
+    }
+    .card {
+      max-width: 700px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      padding: 2em;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+      animation: fadeIn 0.4s ease-in;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    h1, h2 { text-align: center; color: #003366; }
+    .scale label { display: inline-block; width: 20%; text-align: center; }
+    progress { width: 100%; height: 16px; margin: 1em 0; }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 1em 2em;
+      font-size: 1rem;
+      cursor: pointer;
+      margin: 1em auto 0;
+      display: block;
+    }
+    .bar-container { background: #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 1em; }
+    .bar { background: #0066cc; color: white; padding-left: 0.5em; line-height: 24px; height: 24px; }
+    .recommendation {
+      background: #eaf3ff;
+      border-left: 5px solid #0066cc;
+      padding: 1em;
+      margin-top: 1em;
+      border-radius: 8px;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 1em;
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="app">
+    <img src="firmenlogo.png" alt="Logo" class="logo">
+    <h1>Berufsquiz</h1>
+    <div id="content">
+      <h2>Willkommen!</h2>
+      <p>
+        Dieses Quiz hilft dir dabei, deine beruflichen Interessen besser einzuordnen. <br><br>
+        Beantworte 20 Aussagen mit einer Bewertung von 1 (trifft gar nicht zu) bis 5 (trifft voll zu).<br>
+        Die Auswertung zeigt dir, welche Berufsfelder besonders gut zu dir passen könnten.<br><br>
+        Das Ganze dauert nur wenige Minuten – viel Spaß!
+      </p>
+      <button onclick="startQuiz()">Quiz starten</button>
+    </div>
+  </div>
+<script>
+const questions = [
+  { text: "Ich arbeite gerne im Team und übernehme Verantwortung.", fields: ["Büro", "Einzelhandel", "Hauswirtschaft"] },
+  { text: "Ich plane und organisiere gern Abläufe oder Aufgaben.", fields: ["Büro", "Maler", "Hauswirtschaft"] },
+  { text: "Ich arbeite gerne mit Menschen und kann gut zuhören.", fields: ["Friseur", "Einzelhandel", "Hauswirtschaft"] },
+  { text: "Ich finde es spannend, Kunden zu beraten oder ihnen etwas zu verkaufen.", fields: ["Einzelhandel", "Friseur", "Büro"] },
+  { text: "Ich bin geschickt im Umgang mit meinen Händen.", fields: ["Friseur", "Tischler", "Maler", "Gärtner"] },
+  { text: "Ich habe ein Auge für Farben, Formen und Gestaltung.", fields: ["Maler", "Friseur"] },
+  { text: "Ich finde Ordnung, Sauberkeit und Hygiene wichtig.", fields: ["Hauswirtschaft", "Friseur", "Büro"] },
+  { text: "Ich interessiere mich für Computer, Software oder digitale Abläufe.", fields: ["Büro", "Einzelhandel"] },
+  { text: "Ich mag es, Dinge herzustellen, zu reparieren oder zu gestalten.", fields: ["Tischler", "Maler", "Gärtner"] },
+  { text: "Ich fühle mich in der Natur oder bei körperlicher Arbeit wohl.", fields: ["Gärtner", "Maler"] },
+  { text: "Ich kann gut mit Zahlen umgehen und achte auf Genauigkeit.", fields: ["Büro", "Einzelhandel"] },
+  { text: "Ich finde es spannend, Produkte einzukaufen oder zu kalkulieren.", fields: ["Einzelhandel", "Hauswirtschaft", "Büro"] },
+  { text: "Ich bleibe auch in stressigen Situationen ruhig und freundlich.", fields: ["Einzelhandel", "Friseur", "Büro"] },
+  { text: "Ich bringe gerne Struktur und Überblick in komplexe Aufgaben.", fields: ["Büro", "Hauswirtschaft"] },
+  { text: "Ich interessiere mich für Pflege, Kosmetik oder Körperhygiene.", fields: ["Friseur", "Hauswirtschaft"] },
+  { text: "Ich arbeite gerne kreativ und gestalte gerne mit meinen Händen.", fields: ["Friseur", "Maler", "Tischler"] },
+  { text: "Ich übernehme gerne Verantwortung in Projekten oder Veranstaltungen.", fields: ["Büro", "Einzelhandel"] },
+  { text: "Ich finde es wichtig, nachhaltig und sorgfältig mit Materialien umzugehen.", fields: ["Gärtner", "Tischler", "Hauswirtschaft"] },
+  { text: "Ich interessiere mich für wirtschaftliche Zusammenhänge.", fields: ["Büro", "Einzelhandel"] },
+  { text: "Ich möchte mit meiner Arbeit Menschen unterstützen oder ihnen den Alltag erleichtern.", fields: ["Hauswirtschaft", "Friseur", "Einzelhandel"] }
+];
+
+const descriptions = {
+  "Büro": "Du arbeitest gerne strukturiert, planst Abläufe und behältst den Überblick – das spricht für eine Tätigkeit im Büro oder der Verwaltung.",
+  "Einzelhandel": "Du hast Freude am Kontakt mit Menschen, bleibst freundlich und berätst gerne – das passt gut zum Einzelhandel.",
+  "Friseur": "Kreativität, handwerkliches Geschick und Interesse an Styling und Pflege – der Beruf Friseur könnte gut zu dir passen.",
+  "Hauswirtschaft": "Sauberkeit, Struktur, Verantwortung und Dienstleistungsorientierung – das sind gute Voraussetzungen für Hauswirtschaft.",
+  "Gärtner": "Du arbeitest gerne in der Natur und körperlich – vielleicht ist der Garten- und Landschaftsbau etwas für dich.",
+  "Maler": "Farben, Gestaltung und handwerkliches Arbeiten liegen dir – eine Ausbildung im Maler- und Lackiererhandwerk wäre passend.",
+  "Tischler": "Du bist handwerklich geschickt, sorgfältig und kreativ – Eigenschaften, die gut zum Tischlerberuf passen."
+};
+
+let current = 0;
+const results = {};
+function startQuiz() { current = 0; showQuestion(); }
+function showQuestion() {
+  const q = questions[current];
+  document.getElementById("content").innerHTML = `
+    <h2>Frage ${current + 1} von ${questions.length}</h2>
+    <p>${q.text}</p>
+    <div class="scale">
+      ${[1,2,3,4,5].map(i => `<label><input type='radio' name='a' value='${i}'> ${i}</label>`).join("")}
+    </div>
+    <progress value="${current}" max="${questions.length}"></progress>
+    <button onclick="next()">Weiter</button>
+    ${current > 0 ? `<button onclick='back()'>Zurück</button>` : ''}
+  `;
+}
+function next() {
+  const val = document.querySelector("input[name='a']:checked")?.value;
+  if (!val) return alert("Bitte eine Zahl wählen.");
+  const v = parseInt(val);
+  questions[current].fields.forEach(f => results[f] = (results[f] || 0) + v);
+  current++;
+  current < questions.length ? showQuestion() : showResults();
+}
+function back() { if (current > 0) current--; showQuestion(); }
+function showResults() {
+  const max = questions.length * 5;
+  const sorted = Object.entries(results).sort((a,b) => b[1]-a[1]);
+  const bars = sorted.map(([f,s]) => {
+    const p = Math.round(s/max*100);
+    return `<div><strong>${f} (${p}%)</strong><div class='bar-container'><div class='bar' style='width:${p}%;'>${p}%</div></div></div>`;
+  }).join('');
+  const recs = sorted.filter(([_,s]) => s/max >= 0.6).map(([f]) => `<div class='recommendation'>${descriptions[f]}</div>`).join('');
+  document.getElementById("content").innerHTML = `<h2>Deine Auswertung</h2>${bars}${recs}<button onclick="location.reload()">Quiz neu starten</button>`;
+}
+</script>
+</body>
+</html>
